@@ -88,6 +88,7 @@ def search_memories_by_vector(
     session: Session,
     query_embedding: list[float],
     user_id: uuid.UUID,
+    category: Optional[str] = None,
     top_k: int = 30,
     threshold: float = 0.6,
 ) -> list[dict[str, Union[Memory, float]]]:
@@ -104,15 +105,27 @@ def search_memories_by_vector(
     Returns:
         list[dict]: A list of dictionaries, where each dictionary contains the memory and its associated score.
     """
-    query = (
-        select(Memory, Memory.embedding.cosine_distance(query_embedding).label("score"))
-        .filter(
-            Memory.embedding.cosine_distance(query_embedding) < threshold,
-            Memory.user_id == user_id,
+    if category:
+        query = (
+            select(Memory, Memory.embedding.cosine_distance(query_embedding).label("score"))
+            .filter(
+                Memory.embedding.cosine_distance(query_embedding) < threshold,
+                Memory.user_id == user_id,
+                Memory.category.has(name=category),
+            )
+            .order_by(Memory.embedding.cosine_distance(query_embedding))
+            .limit(top_k)
         )
-        .order_by(Memory.embedding.cosine_distance(query_embedding))
-        .limit(top_k)
-    )
+    else:
+        query = (
+            select(Memory, Memory.embedding.cosine_distance(query_embedding).label("score"))
+            .filter(
+                Memory.embedding.cosine_distance(query_embedding) < threshold,
+                Memory.user_id == user_id,
+            )
+            .order_by(Memory.embedding.cosine_distance(query_embedding))
+            .limit(top_k)
+        )
 
     results = session.execute(query).all()
 

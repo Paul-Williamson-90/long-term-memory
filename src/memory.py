@@ -9,24 +9,24 @@ from src.queries import create_user, get_user_by_name, search_memories_by_vector
 
 class MemoryInterface:
     def search(
-        self, query: str, user_id: uuid.UUID, top_k: int = 30, threshold: float = 0.6
+        self, query: str, user_id: uuid.UUID, category: Optional[str] = None, top_k: int = 30, threshold: float = 0.6
     ) -> MemorySearchResults:
         if not any([query, user_id]):
             raise ValueError("Query and user_id must be provided.")
         query_embedding = get_query_embedding(query)
         with get_session() as session:
             results = search_memories_by_vector(
-                session, query_embedding, user_id, top_k, threshold
+                session, query_embedding, user_id, category, top_k, threshold
             )
-        if results:
-            memories = MemorySearchResults(
-                results=[
-                    SemanticMemory.from_dbo(m["memory"], m["score"]) for m in results
-                ],
-            )
-            return memories
-        else:
-            return MemorySearchResults(memories=[])
+            if results:
+                memories = MemorySearchResults(
+                    memories=[
+                        SemanticMemory.from_dbo(m["memory"], m["score"]) for m in results
+                    ],
+                )
+                return memories
+            else:
+                return MemorySearchResults(memories=[])
 
     def add_memory(
         self, text: str, category: str, user_id: uuid.UUID
