@@ -84,17 +84,23 @@ def get_memory_from_uuid(session: Session, uuid: uuid.UUID) -> Optional[Memory]:
     )
 
 
-def search_memories_by_vector(session: Session, query_embedding: list[float], user_id: uuid.UUID, top_k: int = 30, threshold: float = 0.6) -> list[dict[str, Union[Memory, float]]]:
+def search_memories_by_vector(
+    session: Session,
+    query_embedding: list[float],
+    user_id: uuid.UUID,
+    top_k: int = 30,
+    threshold: float = 0.6,
+) -> list[dict[str, Union[Memory, float]]]:
     """
     Search for memories in the database using a vector query.
-    
+
     Args:
         session (Session): The SQLAlchemy session to use.
         query_embedding (list[float]): The embedding vector to search for.
         user_id (uuid.UUID): The ID of the user associated with the memories.
         top_k (int): The number of top results to return.
         threshold (float): The threshold for cosine distance.
-        
+
     Returns:
         list[dict]: A list of dictionaries, where each dictionary contains the memory and its associated score.
     """
@@ -107,7 +113,7 @@ def search_memories_by_vector(session: Session, query_embedding: list[float], us
         .order_by(Memory.embedding.cosine_distance(query_embedding))
         .limit(top_k)
     )
-    
+
     results = session.execute(query).all()
 
     return [{"memory": result[0], "score": result[1]} for result in results]

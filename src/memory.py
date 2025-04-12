@@ -8,29 +8,36 @@ from src.queries import create_user, get_user_by_name, search_memories_by_vector
 
 
 class MemoryInterface:
-    
-    def search(self, query: str, user_id: uuid.UUID, top_k: int = 30, threshold: float = 0.6) -> MemorySearchResults:
+    def search(
+        self, query: str, user_id: uuid.UUID, top_k: int = 30, threshold: float = 0.6
+    ) -> MemorySearchResults:
         if not any([query, user_id]):
             raise ValueError("Query and user_id must be provided.")
         query_embedding = get_query_embedding(query)
         with get_session() as session:
-            results = search_memories_by_vector(session, query_embedding, user_id, top_k, threshold)
+            results = search_memories_by_vector(
+                session, query_embedding, user_id, top_k, threshold
+            )
         if results:
             memories = MemorySearchResults(
-                results=[SemanticMemory.from_dbo(m["memory"], m["score"]) for m in results],
+                results=[
+                    SemanticMemory.from_dbo(m["memory"], m["score"]) for m in results
+                ],
             )
             return memories
         else:
             return MemorySearchResults(memories=[])
-        
-    def add_memory(self, text: str, category: str, user_id: uuid.UUID) -> SemanticMemory:
+
+    def add_memory(
+        self, text: str, category: str, user_id: uuid.UUID
+    ) -> SemanticMemory:
         if not any([text, category, user_id]):
             raise ValueError("Text, category, and user_id must be provided.")
         with get_session() as session:
             memory = SemanticMemory(text=text, category=category, user_id=user_id)
             memory.save(session)
         return memory
-    
+
     def remove_memory_by_uuid(self, memory_id: uuid.UUID) -> bool:
         if not memory_id:
             raise ValueError("Memory ID must be provided.")
@@ -42,14 +49,14 @@ class MemoryInterface:
             else:
                 raise ValueError(f"Memory with ID {memory_id} not found.")
         return False
-    
+
     def create_user(self, name: str) -> uuid.UUID:
         if not name:
             raise ValueError("Name must be provided.")
         with get_session() as session:
             user = create_user(session, name)
         return user.id
-    
+
     def find_user(self, name: str) -> Optional[uuid.UUID]:
         if not name:
             raise ValueError("Name must be provided.")

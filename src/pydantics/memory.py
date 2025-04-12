@@ -22,10 +22,11 @@ class SemanticMemory(BaseModel):
     user_id: str
     created_at: Optional[datetime] = None
     score: Optional[float] = None
-    
+
     def __str__(self) -> str:
         if self.created_at:
-            return f"Memory From {self.created_at.strftime("%d %B %Y")}\n```\n{self.text}\n```"
+            date_str = self.created_at.strftime("%d %B %Y")
+            return f"Memory From {date_str}\n```\n{self.text}\n```"
         else:
             return self.text
 
@@ -68,7 +69,7 @@ class SemanticMemory(BaseModel):
             category=category,
         )
         return memory
-    
+
     def delete(self, session: Session) -> None:
         memory = get_memory_from_uuid(session, self.id)
         if memory is None:
@@ -79,7 +80,7 @@ class SemanticMemory(BaseModel):
 
 class MemorySearchResults(BaseModel):
     memories: list[SemanticMemory]
-    
+
     @model_validator(mode="after")
     def memory_sort_by_score(self) -> "MemorySearchResults":
         self.memories.sort(key=lambda x: x.score, reverse=True)
