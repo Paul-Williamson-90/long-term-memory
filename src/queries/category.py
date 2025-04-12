@@ -34,12 +34,12 @@ def get_category_by_name(session: Session, name: str) -> Optional[MemoryCategory
     Returns:
         Optional[MemoryCategory]: The category with the specified name.
     """
-    return session.query(MemoryCategory).filter(MemoryCategory.name == name).one_or_none()
+    return (
+        session.query(MemoryCategory).filter(MemoryCategory.name == name).one_or_none()
+    )
 
 
-def get_or_create_category_by_name(
-    session: Session, name: str
-) -> MemoryCategory:
+def get_or_create_category_by_name(session: Session, name: str) -> MemoryCategory:
     """
     Get or create a category by its name.
 

@@ -3,11 +3,11 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from src.models import MemoryCategory, User, Memory
+from src.models import Memory, MemoryCategory, User
 
 
 def create_memory(
-    session: Session, 
+    session: Session,
     text: str,
     embedding: list[float],
     user_id: Optional[uuid.UUID] = None,
@@ -26,7 +26,7 @@ def create_memory(
         user (Optional[User]): The user associated with the memory.
         category_id (Optional[uuid.UUID]): The ID of the category associated with the memory.
         category (Optional[MemoryCategory]): The category associated with the memory.
-        
+
     Returns:
         Memory: The created memory.
     """
@@ -43,10 +43,14 @@ def create_memory(
         if user is None:
             raise ValueError(f"User with ID {user_id} not found.")
     if category_id:
-        category = session.query(MemoryCategory).filter(MemoryCategory.id == category_id).one_or_none()
+        category = (
+            session.query(MemoryCategory)
+            .filter(MemoryCategory.id == category_id)
+            .one_or_none()
+        )
         if category is None:
             raise ValueError(f"Category with ID {category_id} not found.")
-        
+
     memory = Memory(
         text=text,
         embedding=embedding,
@@ -57,9 +61,8 @@ def create_memory(
     session.commit()
     session.refresh(memory)
     return memory
-        
-        
-        
+
+
 def get_memory_from_uuid(session: Session, uuid: uuid.UUID) -> Optional[Memory]:
     """
     Get a memory from the database by its UUID.
@@ -72,8 +75,7 @@ def get_memory_from_uuid(session: Session, uuid: uuid.UUID) -> Optional[Memory]:
         Optional[Memory]: The retrieved memory, or None if not found.
     """
     return (
-        session
-        .query(Memory)
+        session.query(Memory)
         .join(MemoryCategory, Memory.category_id == MemoryCategory.id)
         .join(User, Memory.user_id == User.id)
         .filter(Memory.id == uuid)

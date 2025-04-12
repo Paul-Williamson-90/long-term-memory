@@ -1,11 +1,10 @@
-from contextlib import contextmanager, asynccontextmanager
+from contextlib import asynccontextmanager, contextmanager
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from src.settings import settings
-
 
 engine = create_engine(settings.pg_url, echo=True)
 SessionLocal = sessionmaker(bind=engine)
@@ -16,7 +15,9 @@ sync_engine = create_engine(settings.pg_url, echo=True)
 SyncSessionLocal = sessionmaker(bind=sync_engine, autocommit=False, autoflush=False)
 
 async_engine = create_async_engine(settings.async_pg_url, echo=True)
-AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession, autocommit=False, autoflush=False)
+AsyncSessionLocal = sessionmaker(
+    bind=async_engine, class_=AsyncSession, autocommit=False, autoflush=False
+)
 
 
 @contextmanager

@@ -18,7 +18,7 @@ class SemanticMemory(BaseModel):
     text_embedding: Optional[list[float]] = None
     category: str
     user_id: str
-    
+
     @classmethod
     def from_memory_uuid(cls, session: Session, id: uuid.UUID) -> "SemanticMemory":
         memory = get_memory_from_uuid(session, id)
@@ -30,7 +30,7 @@ class SemanticMemory(BaseModel):
             category=memory.category.name,
             user_id=memory.user.id,
         )
-        
+
     @classmethod
     def from_dbo(cls, dbo: Memory) -> "SemanticMemory":
         return cls(
@@ -39,11 +39,11 @@ class SemanticMemory(BaseModel):
             category=dbo.category.name,
             user_id=dbo.user.id,
         )
-        
+
     def _embed_text(self) -> None:
         if self.text_embedding is None:
             self.text_embedding = get_text_embedding(self.text)[0]
-        
+
     def to_dbo(self) -> Memory:
         self._embed_text()
         return Memory(
@@ -52,7 +52,7 @@ class SemanticMemory(BaseModel):
             category=self.category,
             user_id=self.user_id,
         )
-        
+
     def save(self, session: Session) -> Memory:
         self._embed_text()
         category = get_or_create_category_by_name(session, self.category)
