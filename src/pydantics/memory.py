@@ -87,14 +87,6 @@ class SemanticMemory(BaseModel):
 class MemorySearchResults(BaseModel):
     memories: list[SemanticMemory]
 
-    # @model_validator(mode="after")
-    # def memory_sort_by_score(self) -> "MemorySearchResults":
-    #     scored_memories = [m for m in self.memories if m.score is not None]
-    #     non_scored_memories = [m for m in self.memories if m.score is None]
-    #     scored_memories.sort(key=lambda x: x.score, reverse=True)
-    #     self.memories = scored_memories + non_scored_memories
-    #     return self
-
     @model_validator(mode="after")
     def memory_sort_by_created_date(self) -> "MemorySearchResults":
         dated_memories = [
