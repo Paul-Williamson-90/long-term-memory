@@ -107,7 +107,9 @@ def search_memories_by_vector(
     """
     if category:
         query = (
-            select(Memory, Memory.embedding.cosine_distance(query_embedding).label("score"))
+            select(
+                Memory, Memory.embedding.cosine_distance(query_embedding).label("score")
+            )
             .filter(
                 Memory.embedding.cosine_distance(query_embedding) < threshold,
                 Memory.user_id == user_id,
@@ -118,7 +120,9 @@ def search_memories_by_vector(
         )
     else:
         query = (
-            select(Memory, Memory.embedding.cosine_distance(query_embedding).label("score"))
+            select(
+                Memory, Memory.embedding.cosine_distance(query_embedding).label("score")
+            )
             .filter(
                 Memory.embedding.cosine_distance(query_embedding) < threshold,
                 Memory.user_id == user_id,

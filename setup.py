@@ -12,7 +12,9 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 try:
-    result = session.execute(text("SELECT * FROM pg_extension WHERE extname = 'vector';")).fetchone()
+    result = session.execute(
+        text("SELECT * FROM pg_extension WHERE extname = 'vector';")
+    ).fetchone()
     if result:
         logger.info("pgvector extension is already installed.")
     else:
@@ -26,7 +28,7 @@ except Exception as e:
     raise e
 finally:
     session.close()
-    
+
 # Now create the tables
 Base.metadata.create_all(bind=engine)
 logger.info("Tables created successfully.")

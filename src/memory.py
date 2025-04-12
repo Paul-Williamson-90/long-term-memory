@@ -9,7 +9,12 @@ from src.queries import create_user, get_user_by_name, search_memories_by_vector
 
 class MemoryInterface:
     def search(
-        self, query: str, user_id: uuid.UUID, category: Optional[str] = None, top_k: int = 30, threshold: float = 0.6
+        self,
+        query: str,
+        user_id: uuid.UUID,
+        category: Optional[str] = None,
+        top_k: int = 30,
+        threshold: float = 0.6,
     ) -> MemorySearchResults:
         if not any([query, user_id]):
             raise ValueError("Query and user_id must be provided.")
@@ -21,7 +26,8 @@ class MemoryInterface:
             if results:
                 memories = MemorySearchResults(
                     memories=[
-                        SemanticMemory.from_dbo(m["memory"], m["score"]) for m in results
+                        SemanticMemory.from_dbo(m["memory"], m["score"])
+                        for m in results
                     ],
                 )
                 return memories
