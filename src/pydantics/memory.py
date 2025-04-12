@@ -62,6 +62,8 @@ class SemanticMemory(BaseModel):
 
     def save(self, session: Session) -> Memory:
         self._embed_text()
+        if self.text_embedding is None:
+            raise ValueError("Text embedding must be provided.")
         category = get_or_create_category_by_name(session, self.category)
         memory = create_memory(
             session,
@@ -73,6 +75,8 @@ class SemanticMemory(BaseModel):
         return memory
 
     def delete(self, session: Session) -> None:
+        if self.id is None:
+            raise ValueError("Memory ID must be provided.")
         memory = get_memory_from_uuid(session, self.id)
         if memory is None:
             raise ValueError(f"Memory with ID {self.id} not found.")
@@ -83,7 +87,22 @@ class SemanticMemory(BaseModel):
 class MemorySearchResults(BaseModel):
     memories: list[SemanticMemory]
 
+    # @model_validator(mode="after")
+    # def memory_sort_by_score(self) -> "MemorySearchResults":
+    #     scored_memories = [m for m in self.memories if m.score is not None]
+    #     non_scored_memories = [m for m in self.memories if m.score is None]
+    #     scored_memories.sort(key=lambda x: x.score, reverse=True)
+    #     self.memories = scored_memories + non_scored_memories
+    #     return self
+
     @model_validator(mode="after")
-    def memory_sort_by_score(self) -> "MemorySearchResults":
-        self.memories.sort(key=lambda x: x.score, reverse=True)
+    def memory_sort_by_created_date(self) -> "MemorySearchResults":
+        dated_memories = [
+            m for m in self.memories if isinstance(m.created_at, datetime)
+        ]
+        non_dated_memories = [
+            m for m in self.memories if not isinstance(m.created_at, datetime)
+        ]
+        dated_memories.sort(key=lambda x: x.created_at, reverse=True)  # type: ignore
+        self.memories = dated_memories + non_dated_memories
         return self

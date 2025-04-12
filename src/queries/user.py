@@ -30,7 +30,7 @@ def get_user_by_name(session: Session, name: str) -> User | None:
         name (str): The name of the user.
 
     Returns:
-        Optional[User]: The user with the specified name.
+        User | None: The user with the specified name.
     """
     user = session.query(User).filter(User.name == name).one_or_none()
     return user

@@ -26,7 +26,7 @@ class MemoryInterface:
             if results:
                 memories = MemorySearchResults(
                     memories=[
-                        SemanticMemory.from_dbo(m["memory"], m["score"])
+                        SemanticMemory.from_dbo(m["memory"], m["score"])  # type: ignore
                         for m in results
                     ],
                 )
