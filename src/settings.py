@@ -41,14 +41,14 @@ class Settings:
             / f"model_cache/models--{self.embedding_model_name}/snapshots"
         ).exists()
 
-    def get_embedding_model_dir(self) -> str:
+    def get_embedding_model_dir(self) -> Path:
         if not self.embedding_model_dir.exists():
             return (
                 self.embedding_model_dir
                 / f"model_cache/models--{self.embedding_model_name}/snapshots"
             )
         else:
-            return str(self.embedding_model_dir)
+            return self.embedding_model_dir
 
 
 settings = Settings()

@@ -13,7 +13,7 @@ def get_text_embedding(text: list[str]) -> list[list[float]]:
     Returns:
         list[list[float]]: The embedding of the text.
     """
-    return embedding_model.encode(text).tolist()
+    return embedding_model.encode(text).tolist()  # type: ignore
 
 
 def get_query_embedding(query: str) -> list[float]:
@@ -26,7 +26,7 @@ def get_query_embedding(query: str) -> list[float]:
     Returns:
         list[float]: The embedding of the query.
     """
-    return embedding_model.encode(query, prompt_name="query").tolist()
+    return embedding_model.encode(query, prompt_name="query").tolist()  # type: ignore
 
 
 async def aget_text_embedding(text: list[str]) -> list[list[float]]:
@@ -39,7 +39,7 @@ async def aget_text_embedding(text: list[str]) -> list[list[float]]:
     Returns:
         list[list[float]]: The embedding of the text.
     """
-    return await embedding_model.encode(text).tolist()
+    return await embedding_model.encode(text).tolist()  # type: ignore
 
 
 async def aget_query_embedding(query: str) -> list[float]:
@@ -52,7 +52,7 @@ async def aget_query_embedding(query: str) -> list[float]:
     Returns:
         list[float]: The embedding of the query.
     """
-    return await embedding_model.encode(query, prompt_name="query").tolist()
+    return await embedding_model.encode(query, prompt_name="query").tolist()  # type: ignore
 
 
 def get_similarity_scores(
@@ -69,4 +69,4 @@ def get_similarity_scores(
         list[float]: The similarity scores between the query embedding and document embeddings.
     """
     similarities = cos_sim(query_embedding, doc_embeddings)
-    return similarities.tolist()
+    return similarities.tolist()  # type: ignore

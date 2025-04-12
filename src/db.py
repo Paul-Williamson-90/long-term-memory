@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager, contextmanager
+from typing import AsyncGenerator, Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from src.settings import settings
 
@@ -21,7 +22,7 @@ AsyncSessionLocal = sessionmaker(
 
 
 @contextmanager
-def get_session():
+def get_session() -> Generator[None, None, Session]:
     session = SyncSessionLocal()
     try:
         yield session
@@ -34,7 +35,7 @@ def get_session():
 
 
 @asynccontextmanager
-async def aget_session():
+async def aget_session() -> AsyncGenerator[None, AsyncSession]:
     async with AsyncSessionLocal() as session:
         try:
             yield session

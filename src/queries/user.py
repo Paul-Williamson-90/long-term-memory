@@ -1,5 +1,3 @@
-from typing import Optional
-
 from sqlalchemy.orm import Session
 
 from src.models import User
@@ -23,7 +21,7 @@ def create_user(session: Session, name: str) -> User:
     return user
 
 
-def get_user_by_name(session: Session, name: str) -> Optional[User]:
+def get_user_by_name(session: Session, name: str) -> User | None:
     """
     Get a user by name from the database.
 
