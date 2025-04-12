@@ -2,3 +2,4 @@
 .env
 data/
 model_cache/
+__pycache__/

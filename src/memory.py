@@ -55,7 +55,8 @@ class MemoryInterface:
             raise ValueError("Name must be provided.")
         with get_session() as session:
             user = create_user(session, name)
-        return user.id
+            user_id = user.id
+        return user_id
 
     def find_user(self, name: str) -> Optional[uuid.UUID]:
         if not name:
@@ -64,4 +65,5 @@ class MemoryInterface:
             user = get_user_by_name(session, name)
             if not user:
                 return None
-        return user.id
+            user_id = user.id
+        return user_id
