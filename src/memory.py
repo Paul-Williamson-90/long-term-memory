@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import Optional
 
 from src.db import get_session
@@ -13,6 +14,8 @@ class MemoryInterface:
         query: str,
         user_id: uuid.UUID,
         category: Optional[str] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
         top_k: int = 30,
         threshold: float = 0.6,
     ) -> MemorySearchResults:
@@ -21,13 +24,19 @@ class MemoryInterface:
         query_embedding = get_query_embedding(query)
         with get_session() as session:
             results = search_memories_by_vector(
-                session, query_embedding, user_id, category, top_k, threshold
+                session,
+                query_embedding,
+                user_id,
+                category,
+                date_from,
+                date_to,
+                top_k,
+                threshold,
             )
             if results:
                 memories = MemorySearchResults(
                     memories=[
-                        SemanticMemory.from_dbo(m["memory"], m["score"])  # type: ignore
-                        for m in results
+                        SemanticMemory.from_dbo(m.memory, m.score) for m in results
                     ],
                 )
                 return memories

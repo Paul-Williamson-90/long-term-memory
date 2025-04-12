@@ -1,6 +1,8 @@
 import uuid
-from typing import Optional, Union
+from datetime import datetime, timedelta
+from typing import Optional
 
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -84,14 +86,25 @@ def get_memory_from_uuid(session: Session, uuid: uuid.UUID) -> Optional[Memory]:
     )
 
 
+class SearchMemoriesResult(BaseModel):
+    memory: Memory
+    score: float
+
+    class Config:
+        orm_mode = True
+        arbitrary_types_allowed = True
+
+
 def search_memories_by_vector(
     session: Session,
     query_embedding: list[float],
     user_id: uuid.UUID,
     category: Optional[str] = None,
+    date_from: Optional[datetime] = None,
+    date_to: Optional[datetime] = None,
     top_k: int = 30,
     threshold: float = 0.6,
-) -> list[dict[str, Union[Memory, float]]]:
+) -> list[SearchMemoriesResult]:
     """
     Search for memories in the database using a vector query.
 
@@ -99,38 +112,41 @@ def search_memories_by_vector(
         session (Session): The SQLAlchemy session to use.
         query_embedding (list[float]): The embedding vector to search for.
         user_id (uuid.UUID): The ID of the user associated with the memories.
+        category (Optional[str]): The category to filter memories by.
+        date_from (Optional[datetime]): The start date to filter memories by.
+        date_to (Optional[datetime]): The end date to filter memories by.
         top_k (int): The number of top results to return.
         threshold (float): The threshold for cosine distance.
 
     Returns:
         list[dict]: A list of dictionaries, where each dictionary contains the memory and its associated score.
     """
+    if not date_from:
+        date_from = datetime(1970, 1, 1)
+    if not date_to:
+        date_to = datetime.now() + timedelta(days=1)
+    query = select(
+        Memory, Memory.embedding.cosine_distance(query_embedding).label("score")
+    )
     if category:
-        query = (
-            select(
-                Memory, Memory.embedding.cosine_distance(query_embedding).label("score")
-            )
-            .filter(
-                Memory.embedding.cosine_distance(query_embedding) < threshold,
-                Memory.user_id == user_id,
-                Memory.category.has(name=category),
-            )
-            .order_by(Memory.embedding.cosine_distance(query_embedding))
-            .limit(top_k)
+        query = query.filter(
+            Memory.embedding.cosine_distance(query_embedding) < threshold,
+            Memory.user_id == user_id,
+            Memory.category.has(name=category),
+            Memory.created_at.between(date_from, date_to),
         )
     else:
-        query = (
-            select(
-                Memory, Memory.embedding.cosine_distance(query_embedding).label("score")
-            )
-            .filter(
-                Memory.embedding.cosine_distance(query_embedding) < threshold,
-                Memory.user_id == user_id,
-            )
-            .order_by(Memory.embedding.cosine_distance(query_embedding))
-            .limit(top_k)
+        query = query.filter(
+            Memory.embedding.cosine_distance(query_embedding) < threshold,
+            Memory.user_id == user_id,
+            Memory.created_at.between(date_from, date_to),
         )
 
+    query = query.order_by(Memory.embedding.cosine_distance(query_embedding)).limit(
+        top_k
+    )
     results = session.execute(query).all()
 
-    return [{"memory": result[0], "score": result[1]} for result in results]
+    return [
+        SearchMemoriesResult(memory=result[0], score=result[1]) for result in results
+    ]
