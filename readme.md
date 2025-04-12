@@ -1,5 +1,5 @@
 # Simple Long-Term Memory Module
-- This project builds a simple long-term memory component for use with Large Language Models (LLMs). 
+- This project builds a simple long-term memory component for use with Large Language Models (LLMs).
 - Memories and embeddings are stored within a PostgreSQL database, with semantic search capability via pg_vector.
 
 # Setup
